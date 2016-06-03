@@ -81,35 +81,30 @@ Vagrant.configure(2) do |config|
     ucp_node.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
-     sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-     sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >> /etc/apt/sources.list.d/docker.list
-     sudo apt-get update
-     sudo apt-get purge lxc-docker
-     sudo apt-get update
-     sudo apt-get install -y linux-image-extra-$(uname -r)
+     curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+     sudo apt-get update && sudo apt-get install apt-transport-https
+     sudo apt-get install -y linux-image-extra-virtual
+     echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+     sudo apt-get update && sudo apt-get install docker-engine
+     sudo usermod -a -G docker vagrant
      sudo apt-get install -y apparmor
-     sudo apt-get install -y docker-engine
    SHELL
- end
-   config.vm.define "dtr-node" do |dtr_node|
+  end
+
+  config.vm.define "dtr-node" do |dtr_node|
      dtr_node.vm.box = "ubuntu/trusty64"
      dtr_node.vm.network "private_network", type: "dhcp"
      dtr_node.vm.hostname = "dtr-node"
      dtr_node.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y apt-transport-https ca-certificates
-      sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-      sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >> /etc/apt/sources.list.d/docker.list
-      sudo apt-get update
-      sudo apt-get purge lxc-docker
-      sudo apt-get update
-      sudo apt-get install -y linux-image-extra-$(uname -r)
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get install docker-engine
+      sudo usermod -a -G docker vagrant
       sudo apt-get install -y apparmor
-      sudo apt-get install -y docker-engine
     SHELL
   end
-
-  #config.vm.box = "ubuntu/trusty64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
