@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "master" do |master|
     master.vm.box = "ubuntu/trusty64"
     master.vm.network "private_network", type: "dhcp"
-    master.vm.hostname "master-node"
+    master.vm.hostname = "master_node"
     master.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
@@ -52,7 +52,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "node2" do |node2|
     node2.vm.box = "ubuntu/trusty64"
     node2.vm.network "private_network", type: "dhcp"
-    node2.vm.hostname "node2"
+    node2.vm.hostname = "node2"
     node2.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
@@ -71,7 +71,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "ucp-node" do |ucp_node|
     ucp_node.vm.box = "ubuntu/trusty64"
     ucp_node.vm.network "private_network", type: "dhcp"
-    master.vm.hostname "ucp-node"
+    ucp_node.vm.hostname = "ucp-node"
     ucp_node.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
