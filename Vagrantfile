@@ -30,11 +30,11 @@ Vagrant.configure(2) do |config|
    SHELL
   end
 
-  config.vm.define "node1" do |node_1|
-    node_1.vm.box = "ubuntu/trusty64"
-    node_1.vm.network "private_network", type: "dhcp"
-    master.vm.hostname "node1"
-    node_1.vm.provision "shell", inline: <<-SHELL
+  config.vm.define "node1" do |node1|
+    node1.vm.box = "ubuntu/trusty64"
+    node1.vm.network "private_network", type: "dhcp"
+    node1.vm.hostname "node1"
+    node1.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
      sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
@@ -49,11 +49,11 @@ Vagrant.configure(2) do |config|
 
   end
 
-  config.vm.define "node2" do |node_2|
-    node_2.vm.box = "ubuntu/trusty64"
-    node_2.vm.network "private_network", type: "dhcp"
-    master.vm.hostname "node2"
-    node_2.vm.provision "shell", inline: <<-SHELL
+  config.vm.define "node2" do |node2|
+    node2.vm.box = "ubuntu/trusty64"
+    node2.vm.network "private_network", type: "dhcp"
+    node2.vm.hostname "node2"
+    node2.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
      sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
@@ -68,11 +68,11 @@ Vagrant.configure(2) do |config|
 
   end
 
-  config.vm.define "ucp-node" do |dtr_node|
-    dtr_node.vm.box = "ubuntu/trusty64"
-    dtr_node.vm.network "private_network", type: "dhcp"
+  config.vm.define "ucp-node" do |ucp_node|
+    ucp_node.vm.box = "ubuntu/trusty64"
+    ucp_node.vm.network "private_network", type: "dhcp"
     master.vm.hostname "ucp-node"
-    dtr_node.vm.provision "shell", inline: <<-SHELL
+    ucp_node.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
      sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
