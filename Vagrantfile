@@ -12,6 +12,12 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 2
+  end
+
   config.vm.define "master" do |master|
     master.vm.box = "ubuntu/trusty64"
     master.vm.network "private_network", type: "dhcp"
@@ -33,7 +39,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "node1" do |node1|
     node1.vm.box = "ubuntu/trusty64"
     node1.vm.network "private_network", type: "dhcp"
-    node1.vm.hostname "node1"
+    node1.vm.hostname = "node1"
     node1.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
@@ -84,6 +90,23 @@ Vagrant.configure(2) do |config|
      sudo apt-get install -y apparmor
      sudo apt-get install -y docker-engine
    SHELL
+ end
+   config.vm.define "dtr-node" do |dtr_node|
+     dtr_node.vm.box = "ubuntu/trusty64"
+     dtr_node.vm.network "private_network", type: "dhcp"
+     dtr_node.vm.hostname = "dtr-node"
+     dtr_node.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+      sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >> /etc/apt/sources.list.d/docker.list
+      sudo apt-get update
+      sudo apt-get purge lxc-docker
+      sudo apt-get update
+      sudo apt-get install -y linux-image-extra-$(uname -r)
+      sudo apt-get install -y apparmor
+      sudo apt-get install -y docker-engine
+    SHELL
   end
 
   #config.vm.box = "ubuntu/trusty64"
