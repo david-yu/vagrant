@@ -13,15 +13,14 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
 
-  config.vm.provider "virtualbox" do |v|
-    v.memory = 2048
-    v.cpus = 2
-  end
-
   config.vm.define "master" do |master|
     master.vm.box = "ubuntu/trusty64"
     master.vm.network "private_network", type: "dhcp"
     master.vm.hostname = "master_node"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "2048"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
     master.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
@@ -40,6 +39,10 @@ Vagrant.configure(2) do |config|
     node1.vm.box = "ubuntu/trusty64"
     node1.vm.network "private_network", type: "dhcp"
     node1.vm.hostname = "node1"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "2048"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
     node1.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
@@ -59,6 +62,10 @@ Vagrant.configure(2) do |config|
     node2.vm.box = "ubuntu/trusty64"
     node2.vm.network "private_network", type: "dhcp"
     node2.vm.hostname = "node2"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "2048"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
     node2.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
@@ -78,6 +85,10 @@ Vagrant.configure(2) do |config|
     ucp_node.vm.box = "ubuntu/trusty64"
     ucp_node.vm.network "private_network", type: "dhcp"
     ucp_node.vm.hostname = "ucp-node"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "4096"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
     ucp_node.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
@@ -94,6 +105,10 @@ Vagrant.configure(2) do |config|
      dtr_node.vm.box = "ubuntu/trusty64"
      dtr_node.vm.network "private_network", type: "dhcp"
      dtr_node.vm.hostname = "dtr-node"
+     config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "4096"]
+        vb.customize ["modifyvm", :id, "--cpus", "2"]
+     end
      dtr_node.vm.provision "shell", inline: <<-SHELL
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get -y install apt-transport-https
