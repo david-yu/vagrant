@@ -82,12 +82,11 @@ Vagrant.configure(2) do |config|
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-     sudo apt-get update && sudo apt-get install apt-transport-https
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
      sudo apt-get install -y linux-image-extra-virtual
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-     sudo apt-get update && sudo apt-get install docker-engine
+     sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
-     sudo apt-get install -y apparmor
    SHELL
   end
 
@@ -97,12 +96,11 @@ Vagrant.configure(2) do |config|
      dtr_node.vm.hostname = "dtr-node"
      dtr_node.vm.provision "shell", inline: <<-SHELL
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-      sudo apt-get update && sudo apt-get install apt-transport-https
+      sudo apt-get update && sudo apt-get -y install apt-transport-https
       sudo apt-get install -y linux-image-extra-virtual
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-      sudo apt-get update && sudo apt-get install docker-engine
+      sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
-      sudo apt-get install -y apparmor
     SHELL
   end
 
