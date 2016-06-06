@@ -30,8 +30,6 @@ docker/dtr install \
 --ucp-ca "$(cat ucp-ca.pem)"
 ```
 
-## Connect to DTR from Mac or Linux client 
+## Connect to DTR from Mac or Linux client
 
 https://docs.docker.com/docker-trusted-registry/configure/config-security/#install-registry-certificates-on-client-docker-daemons
-
-```
