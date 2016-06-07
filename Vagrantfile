@@ -13,25 +13,46 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
 
+  config.vm.define "jenkins" do |jenkins|
+    jenkins.vm.box = "ubuntu/trusty64"
+    jenkins.vm.network "private_network", type: "dhcp"
+    jenkins.vm.hostname = "master_node"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+    jenkins.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install -y apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get -y install docker-engine
+      sudo usermod -a -G docker vagrant
+      wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+      echo "deb http://pkg.jenkins-ci.org/debian binary/" >> /etc/apt/sources.list
+      sudo apt-get -y install jenkins
+   SHELL
+  end
+
   config.vm.define "master" do |master|
     master.vm.box = "ubuntu/trusty64"
     master.vm.network "private_network", type: "dhcp"
     master.vm.hostname = "master_node"
     config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "2048"]
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
     master.vm.provision "shell", inline: <<-SHELL
-     sudo apt-get update
-     sudo apt-get install -y apt-transport-https ca-certificates
-     sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-     sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >> /etc/apt/sources.list.d/docker.list
-     sudo apt-get update
-     sudo apt-get purge lxc-docker
-     sudo apt-get update
-     sudo apt-get install -y linux-image-extra-$(uname -r)
-     sudo apt-get install -y apparmor
-     sudo apt-get install -y docker-engine
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install -y apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get -y install docker-engine
+      sudo usermod -a -G docker vagrant
    SHELL
   end
 
@@ -40,20 +61,18 @@ Vagrant.configure(2) do |config|
     node1.vm.network "private_network", type: "dhcp"
     node1.vm.hostname = "node1"
     config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "2048"]
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
     node1.vm.provision "shell", inline: <<-SHELL
-     sudo apt-get update
-     sudo apt-get install -y apt-transport-https ca-certificates
-     sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-     sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >> /etc/apt/sources.list.d/docker.list
-     sudo apt-get update
-     sudo apt-get purge lxc-docker
-     sudo apt-get update
-     sudo apt-get install -y linux-image-extra-$(uname -r)
-     sudo apt-get install -y apparmor
-     sudo apt-get install -y docker-engine
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install -y apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get -y install docker-engine
+      sudo usermod -a -G docker vagrant
    SHELL
 
   end
@@ -63,21 +82,19 @@ Vagrant.configure(2) do |config|
     node2.vm.network "private_network", type: "dhcp"
     node2.vm.hostname = "node2"
     config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "2048"]
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
     node2.vm.provision "shell", inline: <<-SHELL
-     sudo apt-get update
-     sudo apt-get install -y apt-transport-https ca-certificates
-     sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-     sudo echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" >> /etc/apt/sources.list.d/docker.list
-     sudo apt-get update
-     sudo apt-get purge lxc-docker
-     sudo apt-get update
-     sudo apt-get install -y linux-image-extra-$(uname -r)
-     sudo apt-get install -y apparmor
-     sudo apt-get install -y docker-engine
-   SHELL
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install -y apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get -y install docker-engine
+      sudo usermod -a -G docker vagrant
+    SHELL
 
   end
 
@@ -98,6 +115,7 @@ Vagrant.configure(2) do |config|
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > ipaddr
    SHELL
   end
 
@@ -116,6 +134,14 @@ Vagrant.configure(2) do |config|
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
+      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > ipaddr
+      # docker run -it --rm \
+      # docker/dtr install \
+      # --ucp-url https://172.28.128.5 \
+      # --ucp-node dtr-node \
+      # --dtr-external-url ${cat ipaddr} \
+      # --ucp-username admin --ucp-password admin \
+      # --ucp-ca "$(cat ucp-ca.pem)"
     SHELL
   end
 
@@ -144,21 +170,6 @@ Vagrant.configure(2) do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
-
   # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
   # such as FTP and Heroku are also available. See the documentation at
   # https://docs.vagrantup.com/v2/push/atlas.html for more information.
@@ -166,11 +177,4 @@ Vagrant.configure(2) do |config|
   #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
   # end
 
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   sudo apt-get update
-  #   sudo apt-get install -y apache2
-  # SHELL
 end
