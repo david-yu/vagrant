@@ -121,7 +121,6 @@ Vagrant.configure(2) do |config|
      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > ipaddr
      wget https://dl.eff.org/certbot-auto
      chmod a+x certbot-auto
-     ./certbot-auto
    SHELL
   end
 

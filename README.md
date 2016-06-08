@@ -1,13 +1,13 @@
 Vagrant setup for Docker
 ========================
 
-## Bring up UCP and DTR nodes
+## Bring up UCP, DTR, and Jenkins nodes
 
 ```
-vagrant up ucp-node dtr-node
+vagrant up ucp-node dtr-node jenkins
 ```
 
-## Join dtr-node to UCP cluster
+## Join dtr-node and jenkins-node to UCP cluster
 
 ```
 docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join \
