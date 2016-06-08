@@ -43,69 +43,6 @@ Vagrant.configure(2) do |config|
    SHELL
   end
 
-  config.vm.define "master" do |master|
-    master.vm.box = "ubuntu/trusty64"
-    master.vm.network "private_network", type: "dhcp"
-    master.vm.hostname = "master-node"
-    config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
-       vb.customize ["modifyvm", :id, "--cpus", "2"]
-    end
-    master.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y apt-transport-https ca-certificates
-      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-      sudo apt-get update && sudo apt-get install -y apt-transport-https
-      sudo apt-get install -y linux-image-extra-virtual
-      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-      sudo apt-get update && sudo apt-get -y install docker-engine
-      sudo usermod -a -G docker vagrant
-      docker run -d -p "8500:8500" -h "consul" progrium/consul -server -bootstrap
-   SHELL
-  end
-
-  config.vm.define "node1" do |node1|
-    node1.vm.box = "ubuntu/trusty64"
-    node1.vm.network "private_network", type: "dhcp"
-    node1.vm.hostname = "node1"
-    config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
-       vb.customize ["modifyvm", :id, "--cpus", "2"]
-    end
-    node1.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y apt-transport-https ca-certificates
-      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-      sudo apt-get update && sudo apt-get install -y apt-transport-https
-      sudo apt-get install -y linux-image-extra-virtual
-      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-      sudo apt-get update && sudo apt-get -y install docker-engine
-      sudo usermod -a -G docker vagrant
-   SHELL
-
-  end
-
-  config.vm.define "node2" do |node2|
-    node2.vm.box = "ubuntu/trusty64"
-    node2.vm.network "private_network", type: "dhcp"
-    node2.vm.hostname = "node2"
-    config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
-       vb.customize ["modifyvm", :id, "--cpus", "2"]
-    end
-    node2.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y apt-transport-https ca-certificates
-      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-      sudo apt-get update && sudo apt-get install -y apt-transport-https
-      sudo apt-get install -y linux-image-extra-virtual
-      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-      sudo apt-get update && sudo apt-get -y install docker-engine
-      sudo usermod -a -G docker vagrant
-    SHELL
-
-  end
-
   config.vm.define "ucp-node" do |ucp_node|
     ucp_node.vm.box = "ubuntu/trusty64"
     ucp_node.vm.network "private_network", type: "dhcp"
@@ -153,6 +90,71 @@ Vagrant.configure(2) do |config|
       curl -k "https://${UCP_IPADDR}/ca" > /vagrant/ucp-ca.pem
       docker run -it --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
       docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url --host-address ${DTR_IPADDR} https://${UCP_IPADDR} --fingerprint $(UCP_FINGERPRINT)
+    SHELL
+  end
+
+  # Swarm master practice node
+  config.vm.define "master" do |master|
+    master.vm.box = "ubuntu/trusty64"
+    master.vm.network "private_network", type: "dhcp"
+    master.vm.hostname = "master-node"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+    master.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install -y apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get -y install docker-engine
+      sudo usermod -a -G docker vagrant
+      docker run -d -p "8500:8500" -h "consul" progrium/consul -server -bootstrap
+   SHELL
+  end
+
+  # Swarm child practice node
+  config.vm.define "node1" do |node1|
+    node1.vm.box = "ubuntu/trusty64"
+    node1.vm.network "private_network", type: "dhcp"
+    node1.vm.hostname = "node1"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+    node1.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install -y apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get -y install docker-engine
+      sudo usermod -a -G docker vagrant
+   SHELL
+
+  end
+
+  # Swarm child practice node
+  config.vm.define "node2" do |node2|
+    node2.vm.box = "ubuntu/trusty64"
+    node2.vm.network "private_network", type: "dhcp"
+    node2.vm.hostname = "node2"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+    node2.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates
+      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+      sudo apt-get update && sudo apt-get install -y apt-transport-https
+      sudo apt-get install -y linux-image-extra-virtual
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      sudo apt-get update && sudo apt-get -y install docker-engine
+      sudo usermod -a -G docker vagrant
     SHELL
   end
 

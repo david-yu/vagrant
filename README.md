@@ -7,18 +7,8 @@ Vagrant Virtualbox setup for Docker
 vagrant up ucp-node dtr-node jenkins
 ```
 
-## Join dtr-node and jenkins-node to UCP cluster
-
-```
-docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join \
---admin-username admin --host-address 172.28.128.6 --interactive --url https://172.28.128.5 \
---fingerprint 78:8E:80:46:33:F2:7A:20:1C:EE:08:C6:B2:CE:09:EE:1A:A7:92:A8:E2:9F:89:73:A8:5E:54:84:C2:D2:43:84
-
-docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join \
---admin-username admin --host-address 172.28.128.15 --interactive --url https://172.28.128.5 \
---fingerprint 78:8E:80:46:33:F2:7A:20:1C:EE:08:C6:B2:CE:09:EE:1A:A7:92:A8:E2:9F:89:73:A8:5E:54:84:C2:D2:43:84
-```
-
 ## Connect to DTR from Mac or Linux client
+
+Download Client bundle and store in vagrant project folder to share with VMs
 
 https://docs.docker.com/docker-trusted-registry/configure/config-security/#install-registry-certificates-on-client-docker-daemons
