@@ -1,2 +1,6 @@
 .vagrant
 .crt
+.pem
+dtr-ipaddr
+ucp-ipaddr
+ucp-bundle-admin
