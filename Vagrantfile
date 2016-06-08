@@ -71,7 +71,7 @@ Vagrant.configure(2) do |config|
      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-ipaddr
      #wget https://dl.eff.org/certbot-auto
      #chmod a+x certbot-auto
-     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp install -i --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp install --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp fingerprint | awk -F "=" '/SHA-256 Fingerprint/ {print $2}'  > /vagrant/ucp-fingerprint
    SHELL
   end
