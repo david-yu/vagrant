@@ -13,6 +13,7 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
 
+  # Jenkins node for UCP/DTR setup - still need to setup project and install plugins
   config.vm.define "jenkins" do |jenkins|
     jenkins.vm.box = "ubuntu/trusty64"
     jenkins.vm.network "private_network", type: "dhcp"
@@ -43,6 +44,7 @@ Vagrant.configure(2) do |config|
    SHELL
   end
 
+  # UCP node for UCP/DTR setup
   config.vm.define "ucp-node" do |ucp_node|
     ucp_node.vm.box = "ubuntu/trusty64"
     ucp_node.vm.network "private_network", type: "dhcp"
@@ -68,6 +70,7 @@ Vagrant.configure(2) do |config|
    SHELL
   end
 
+  # DTR node for UCP/DTR setup
   config.vm.define "dtr-node" do |dtr_node|
      dtr_node.vm.box = "ubuntu/trusty64"
      dtr_node.vm.network "private_network", type: "dhcp"
