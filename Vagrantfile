@@ -35,12 +35,11 @@ Vagrant.configure(2) do |config|
       echo "deb http://pkg.jenkins-ci.org/debian binary/" | sudo tee /etc/apt/sources.list
       sudo apt-get update
       sudo apt-get -y install jenkins
-      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:1.1.1 fingerprint
-      # docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join \
-      # --admin-username admin \
-      # --interactive \
-      # --url https://172.28.128.5 \
-      # --fingerprint 78:8E:80:46:33:F2:7A:20:1C:EE:08:C6:B2:CE:09:EE:1A:A7:92:A8:E2:9F:89:73:A8:5E:54:84:C2:D2:43:84
+      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
+      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
+      docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
    SHELL
   end
 
@@ -128,6 +127,7 @@ Vagrant.configure(2) do |config|
      wget https://dl.eff.org/certbot-auto
      chmod a+x certbot-auto
      docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp install -i --host-address $(cat "/vagrant/ucp-ipaddr")
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:1.1.1 fingerprint
    SHELL
   end
 
@@ -149,14 +149,10 @@ Vagrant.configure(2) do |config|
       ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/dtr-ipaddr
       export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
       export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       curl -k "https://${UCP_IPADDR}/ca" > /vagrant/ucp-ca.pem
       docker run -it --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
-      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:1.1.1 fingerprint
-      # docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join \
-      # --admin-username admin \
-      # --interactive \
-      # --url https://172.28.128.5 \
-      # --fingerprint 78:8E:80:46:33:F2:7A:20:1C:EE:08:C6:B2:CE:09:EE:1A:A7:92:A8:E2:9F:89:73:A8:5E:54:84:C2:D2:43:84
+      docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url --host-address ${DTR_IPADDR} https://${UCP_IPADDR} --fingerprint $(UCP_FINGERPRINT)
     SHELL
   end
 

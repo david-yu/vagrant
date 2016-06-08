@@ -1,6 +1,6 @@
 .vagrant
 .crt
-.pem
+ucp-ca.pem
 dtr-ipaddr
 ucp-ipaddr
 ucp-bundle-admin
