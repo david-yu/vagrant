@@ -3,4 +3,6 @@
 ucp-ca.pem
 dtr-ipaddr
 ucp-ipaddr
+ucp-fingerprint
+docker_subscription.lic
 ucp-bundle-admin

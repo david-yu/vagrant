@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
   # boxes at https://atlas.hashicorp.com/search.
 
   # Jenkins node for UCP/DTR setup - still need to setup project and install plugins
-  config.vm.define "jenkins" do |jenkins|
+  config.vm.define "jenkins-node" do |jenkins|
     jenkins.vm.box = "ubuntu/trusty64"
     jenkins.vm.network "private_network", type: "dhcp"
     jenkins.vm.hostname = "jenkins-node"
@@ -40,7 +40,13 @@ Vagrant.configure(2) do |config|
       export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
-      docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+      # TODO: Copy workspace to automate jenkins setup (initial password file, git access, etc)
+      cp -r jenkins /var/lib/
+      # sudo curl -O http://updates.jenkins-ci.org/latest/authentication-tokens.hpi
+      # sudo curl -O http://updates.jenkins-ci.org/latest/docker-commons.hpi
+      # sudo curl -O http://updates.jenkins-ci.org/latest/docker-build-publish.hpi
+      curl http://${JENKINS_IPADDR}:8080/reload
    SHELL
   end
 
@@ -63,10 +69,10 @@ Vagrant.configure(2) do |config|
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-ipaddr
-     wget https://dl.eff.org/certbot-auto
-     chmod a+x certbot-auto
-     docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp install -i --host-address $(cat "/vagrant/ucp-ipaddr")
-     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:1.1.1 fingerprint | awk -F "=" '/SHA-256 Fingerprint/ {print $2}'  > /vagrant/ucp-fingerprint
+     #wget https://dl.eff.org/certbot-auto
+     #chmod a+x certbot-auto
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp install -i --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp fingerprint | awk -F "=" '/SHA-256 Fingerprint/ {print $2}'  > /vagrant/ucp-fingerprint
    SHELL
   end
 
@@ -91,8 +97,8 @@ Vagrant.configure(2) do |config|
       export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       curl -k "https://${UCP_IPADDR}/ca" > /vagrant/ucp-ca.pem
-      docker run -it --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
-      docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url --host-address ${DTR_IPADDR} https://${UCP_IPADDR} --fingerprint $(UCP_FINGERPRINT)
+      docker run --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
+      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url --host-address ${DTR_IPADDR} https://${UCP_IPADDR} --fingerprint $(UCP_FINGERPRINT)
     SHELL
   end
 
