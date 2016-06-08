@@ -16,14 +16,15 @@ Vagrant.configure(2) do |config|
   config.vm.define "jenkins" do |jenkins|
     jenkins.vm.box = "ubuntu/trusty64"
     jenkins.vm.network "private_network", type: "dhcp"
-    jenkins.vm.hostname = "master_node"
+    jenkins.vm.hostname = "jenkins-node"
     config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
+       vb.customize ["modifyvm", :id, "--memory", "4096"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
     jenkins.vm.provision "shell", inline: <<-SHELL
       sudo apt-get update
       sudo apt-get install -y apt-transport-https ca-certificates
+      sudo apt-get install -y default-jre default-jdk daemon
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get install -y apt-transport-https
       sudo apt-get install -y linux-image-extra-virtual
@@ -31,7 +32,8 @@ Vagrant.configure(2) do |config|
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
       wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
-      echo "deb http://pkg.jenkins-ci.org/debian binary/" >> /etc/apt/sources.list
+      echo "deb http://pkg.jenkins-ci.org/debian binary/" | sudo tee /etc/apt/sources.list
+      sudo apt-get update
       sudo apt-get -y install jenkins
    SHELL
   end
@@ -39,7 +41,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "master" do |master|
     master.vm.box = "ubuntu/trusty64"
     master.vm.network "private_network", type: "dhcp"
-    master.vm.hostname = "master_node"
+    master.vm.hostname = "master-node"
     config.vm.provider :virtualbox do |vb|
        vb.customize ["modifyvm", :id, "--memory", "1024"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
@@ -53,6 +55,7 @@ Vagrant.configure(2) do |config|
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
+      docker run -d -p "8500:8500" -h "consul" progrium/consul -server -bootstrap
    SHELL
   end
 
@@ -116,6 +119,9 @@ Vagrant.configure(2) do |config|
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > ipaddr
+     wget https://dl.eff.org/certbot-auto
+     chmod a+x certbot-auto
+     ./certbot-auto
    SHELL
   end
 
