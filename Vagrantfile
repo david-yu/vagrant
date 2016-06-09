@@ -13,40 +13,6 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
 
-  # Jenkins node for UCP/DTR setup - still need to setup project and install plugins
-  config.vm.define "jenkins-node" do |jenkins|
-    jenkins.vm.box = "ubuntu/trusty64"
-    jenkins.vm.network "private_network", type: "dhcp"
-    jenkins.vm.hostname = "jenkins-node"
-    config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "4096"]
-       vb.customize ["modifyvm", :id, "--cpus", "2"]
-    end
-    jenkins.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y apt-transport-https ca-certificates
-      sudo apt-get install -y default-jre default-jdk daemon
-      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-      sudo apt-get update && sudo apt-get install -y apt-transport-https
-      sudo apt-get install -y linux-image-extra-virtual
-      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-      sudo apt-get update && sudo apt-get -y install docker-engine
-      sudo usermod -a -G docker vagrant
-      wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
-      echo "deb http://pkg.jenkins-ci.org/debian binary/" | sudo tee /etc/apt/sources.list
-      sudo apt-get update
-      sudo apt-get -y install jenkins
-      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
-      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
-      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
-      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
-      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
-      sudo cp -r /vagrant/jenkins /home/vagrant
-      export JENKINS_HOME=/home/vagrant/jenkins
-      sudo service jenkins restart
-   SHELL
-  end
-
   # UCP node for UCP/DTR setup
   config.vm.define "ucp-node" do |ucp_node|
     ucp_node.vm.box = "ubuntu/trusty64"
@@ -111,69 +77,38 @@ Vagrant.configure(2) do |config|
     SHELL
   end
 
-  # Swarm master practice node
-  config.vm.define "master" do |master|
-    master.vm.box = "ubuntu/trusty64"
-    master.vm.network "private_network", type: "dhcp"
-    master.vm.hostname = "master-node"
+  # Jenkins node for UCP/DTR setup - still need to setup project and install plugins
+  config.vm.define "jenkins-node" do |jenkins|
+    jenkins.vm.box = "ubuntu/trusty64"
+    jenkins.vm.network "private_network", type: "dhcp"
+    jenkins.vm.hostname = "jenkins-node"
     config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
+       vb.customize ["modifyvm", :id, "--memory", "4096"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
-    master.vm.provision "shell", inline: <<-SHELL
+    jenkins.vm.provision "shell", inline: <<-SHELL
       sudo apt-get update
       sudo apt-get install -y apt-transport-https ca-certificates
+      sudo apt-get install -y default-jre default-jdk daemon
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get install -y apt-transport-https
       sudo apt-get install -y linux-image-extra-virtual
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
-      docker run -d -p "8500:8500" -h "consul" progrium/consul -server -bootstrap
+      wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+      echo "deb http://pkg.jenkins-ci.org/debian binary/" | sudo tee /etc/apt/sources.list
+      sudo apt-get update
+      sudo apt-get -y install jenkins
+      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
+      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
+      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+      sudo cp -r /vagrant/jenkins /home/vagrant
+      export JENKINS_HOME=/home/vagrant/jenkins
+      sudo service jenkins restart
    SHELL
-  end
-
-  # Swarm child practice node
-  config.vm.define "node1" do |node1|
-    node1.vm.box = "ubuntu/trusty64"
-    node1.vm.network "private_network", type: "dhcp"
-    node1.vm.hostname = "node1"
-    config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
-       vb.customize ["modifyvm", :id, "--cpus", "2"]
-    end
-    node1.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y apt-transport-https ca-certificates
-      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-      sudo apt-get update && sudo apt-get install -y apt-transport-https
-      sudo apt-get install -y linux-image-extra-virtual
-      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-      sudo apt-get update && sudo apt-get -y install docker-engine
-      sudo usermod -a -G docker vagrant
-   SHELL
-
-  end
-
-  # Swarm child practice node
-  config.vm.define "node2" do |node2|
-    node2.vm.box = "ubuntu/trusty64"
-    node2.vm.network "private_network", type: "dhcp"
-    node2.vm.hostname = "node2"
-    config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
-       vb.customize ["modifyvm", :id, "--cpus", "2"]
-    end
-    node2.vm.provision "shell", inline: <<-SHELL
-      sudo apt-get update
-      sudo apt-get install -y apt-transport-https ca-certificates
-      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
-      sudo apt-get update && sudo apt-get install -y apt-transport-https
-      sudo apt-get install -y linux-image-extra-virtual
-      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
-      sudo apt-get update && sudo apt-get -y install docker-engine
-      sudo usermod -a -G docker vagrant
-    SHELL
   end
 
   # Disable automatic box update checking. If you disable this, then

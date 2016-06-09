@@ -2,6 +2,7 @@
 .crt
 ucp-ca.pem
 dtr-ipaddr
+jenkins-ipaddr
 ucp-ipaddr
 ucp-fingerprint
 docker_subscription.lic
