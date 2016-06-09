@@ -41,12 +41,9 @@ Vagrant.configure(2) do |config|
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
-      # TODO: Copy workspace to automate jenkins setup (initial password file, git access, etc)
-      cp -r jenkins /var/lib/
-      # sudo curl -O http://updates.jenkins-ci.org/latest/authentication-tokens.hpi
-      # sudo curl -O http://updates.jenkins-ci.org/latest/docker-commons.hpi
-      # sudo curl -O http://updates.jenkins-ci.org/latest/docker-build-publish.hpi
-      curl http://${JENKINS_IPADDR}:8080/reload
+      sudo cp -r /vagrant/jenkins /home/vagrant
+      export JENKINS_HOME=/home/vagrant/jenkins
+      sudo service jenkins restart
    SHELL
   end
 
@@ -71,10 +68,10 @@ Vagrant.configure(2) do |config|
      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-ipaddr
      #wget https://dl.eff.org/certbot-auto
      #chmod a+x certbot-auto
+     # Install UCP with license key
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/docker_subscription.lic:/docker_subscription.lic docker/ucp install --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
+     # Retrieve UCP fingerprint
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp fingerprint | awk -F "=" '/SHA-256 Fingerprint/ {print $2}'  > /vagrant/ucp-fingerprint
-     # Configure DTR to trust UCP
-     # Configure UCP to use DTR
    SHELL
   end
 
@@ -99,8 +96,18 @@ Vagrant.configure(2) do |config|
       export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       curl -k "https://${UCP_IPADDR}/ca" > /vagrant/ucp-ca.pem
+      # Join UCP Swarm
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url https://${UCP_IPADDR} --host-address ${DTR_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+      # Install DTR
       docker run --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
+      # Configure DTR to trust UCP
+      export DTR_CONFIG_DATA="{\"authBypassCA\":\"$(cat /vagrant/ucp-ca.pem | sed ':begin;$!N;s|\n|\\n|;tbegin')\"}"
+      curl -u admin:admin -k  -H "Content-Type: application/json" https://${DTR_IPADDR}/api/v0/meta/settings -X POST --data-binary "${DTR_CONFIG_DATA}"
+      # Configure UCP to use DTR
+      sudo apt-get -y install jq
+      export UCP_AUTH_TOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
+      export UCP_CONFIG_DATA="{\"url\":\"https://${DTR_IPADDR}\", \"insecure\":true }"
+      curl -k -s -c jar -H "Authorization: Bearer ${UCP_AUTH_TOKEN}" https://${UCP_IPADDR}/api/config/registry -X POST --data "${UCP_CONFIG_DATA}"
     SHELL
   end
 
