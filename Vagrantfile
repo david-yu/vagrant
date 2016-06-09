@@ -73,6 +73,8 @@ Vagrant.configure(2) do |config|
      #chmod a+x certbot-auto
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/docker_subscription.lic:/docker_subscription.lic docker/ucp install --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp fingerprint | awk -F "=" '/SHA-256 Fingerprint/ {print $2}'  > /vagrant/ucp-fingerprint
+     # Configure DTR to trust UCP
+     # Configure UCP to use DTR
    SHELL
   end
 
@@ -97,8 +99,8 @@ Vagrant.configure(2) do |config|
       export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       curl -k "https://${UCP_IPADDR}/ca" > /vagrant/ucp-ca.pem
+      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url https://${UCP_IPADDR} --host-address ${DTR_IPADDR} --fingerprint ${UCP_FINGERPRINT}
       docker run --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
-      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url --host-address ${DTR_IPADDR} https://${UCP_IPADDR} --fingerprint $(UCP_FINGERPRINT)
     SHELL
   end
 
