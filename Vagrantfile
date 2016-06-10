@@ -95,18 +95,21 @@ Vagrant.configure(2) do |config|
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
-      # Install registry certificates on client Docker daemons
+      # Install registry certificates on client Docker daemon
       export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
       openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
       sudo update-ca-certificates
-      sudo service docker restart
-      docker login -u admin -p admin https://${DTR_IPADDR}
       # Install Jenkins
       wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
       echo "deb http://pkg.jenkins-ci.org/debian binary/" | sudo tee /etc/apt/sources.list
       sudo apt-get update
       sudo apt-get -y install jenkins
       sudo usermod -a -G docker jenkins
+      sudo service docker restart
+      sudo cp -r /vagrant/jenkins /var/lib
+      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+      sudo chmod +x /usr/local/bin/docker-compose
+      sudo -u jenkins docker login -u admin -p admin https://${DTR_IPADDR}
       ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
       export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
