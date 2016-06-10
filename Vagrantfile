@@ -32,8 +32,6 @@ Vagrant.configure(2) do |config|
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-ipaddr
-     #wget https://dl.eff.org/certbot-auto
-     #chmod a+x certbot-auto
      # Install UCP with license key
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/docker_subscription.lic:/docker_subscription.lic docker/ucp install --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
      # Retrieve UCP fingerprint
@@ -90,12 +88,20 @@ Vagrant.configure(2) do |config|
       sudo apt-get update
       sudo apt-get install -y apt-transport-https ca-certificates
       sudo apt-get install -y default-jre default-jdk daemon
+      # Install Docker deamon
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get install -y apt-transport-https
       sudo apt-get install -y linux-image-extra-virtual
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
+      # Install registry certificates on client Docker daemons
+      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+      sudo update-ca-certificates
+      sudo service docker restart
+      docker login -u admin -p admin https://${DTR_IPADDR} 
+      # Install Jenkins
       wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
       echo "deb http://pkg.jenkins-ci.org/debian binary/" | sudo tee /etc/apt/sources.list
       sudo apt-get update
@@ -105,11 +111,30 @@ Vagrant.configure(2) do |config|
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
-      sudo cp -r /vagrant/jenkins /home/vagrant
-      export JENKINS_HOME=/home/vagrant/jenkins
-      sudo service jenkins restart
    SHELL
   end
+
+  # Swarm child practice node
+ config.vm.define "node1" do |node1|
+   node1.vm.box = "ubuntu/trusty64"
+   node1.vm.network "private_network", type: "dhcp"
+   node1.vm.hostname = "node1"
+   config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024"]
+      vb.customize ["modifyvm", :id, "--cpus", "2"]
+   end
+   node1.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     sudo apt-get install -y linux-image-extra-virtual
+     echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+     sudo apt-get update && sudo apt-get -y install docker-engine
+     sudo usermod -a -G docker vagrant
+  SHELL
+ end
+
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
