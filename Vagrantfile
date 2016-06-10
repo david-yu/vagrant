@@ -88,7 +88,7 @@ Vagrant.configure(2) do |config|
       sudo apt-get update
       sudo apt-get install -y apt-transport-https ca-certificates
       sudo apt-get install -y default-jre default-jdk daemon
-      # Install Docker deamon
+      # Install Docker daemon
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get install -y apt-transport-https
       sudo apt-get install -y linux-image-extra-virtual
@@ -100,12 +100,13 @@ Vagrant.configure(2) do |config|
       openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
       sudo update-ca-certificates
       sudo service docker restart
-      docker login -u admin -p admin https://${DTR_IPADDR} 
+      docker login -u admin -p admin https://${DTR_IPADDR}
       # Install Jenkins
       wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
       echo "deb http://pkg.jenkins-ci.org/debian binary/" | sudo tee /etc/apt/sources.list
       sudo apt-get update
       sudo apt-get -y install jenkins
+      sudo usermod -a -G docker jenkins
       ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
       export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
