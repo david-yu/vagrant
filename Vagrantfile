@@ -106,7 +106,10 @@ Vagrant.configure(2) do |config|
       sudo apt-get -y install jenkins
       sudo usermod -a -G docker jenkins
       sudo service docker restart
-      sudo cp -r /vagrant/jenkins /var/lib
+      # Set up new Jenkins home and copy configs over to home directory
+      sudo cp -r /vagrant/jenkins ~/
+      export JENKINS_HOME=~/jenkins/
+      sudo service jenkins restart
       # Install Docker Compose
       sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
