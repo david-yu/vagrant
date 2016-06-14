@@ -146,6 +146,12 @@ Vagrant.configure(2) do |config|
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
+     # Join UCP Swarm
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+     export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
+     export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+     export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
     SHELL
   end
 
@@ -167,6 +173,12 @@ Vagrant.configure(2) do |config|
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
+     # Join UCP Swarm
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+     export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
+     export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+     export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
     SHELL
   end
 
@@ -188,6 +200,12 @@ Vagrant.configure(2) do |config|
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
+     # Join UCP Swarm
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+     export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
+     export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+     export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
   SHELL
  end
 
