@@ -85,14 +85,15 @@ Vagrant.configure(2) do |config|
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
     jenkins.vm.provision "shell", inline: <<-SHELL
+      echo "deb http://zw.archive.ubuntu.com/ubuntu/ precise main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
       sudo apt-get update
       sudo apt-get install -y apt-transport-https ca-certificates
-      sudo apt-get install -y default-jre default-jdk daemon
+      sudo apt-get install -y default-jre default-jdk daemon curl jq unzip
       # Install Docker daemon
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get install -y apt-transport-https
       sudo apt-get install -y linux-image-extra-virtual
-      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee -a /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
       # Install registry certificates on client Docker daemon
@@ -121,10 +122,12 @@ Vagrant.configure(2) do |config|
       export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
       # Get client bundle from UCP
-      sudo apt-get update && apt-get install curl jq
       export AUTHTOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
       curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o bundle.zip
       unzip bundle.zip
+      sudo chmod +x env.sh
+      sudo chown jenkins ~/*
+      sudo chgrp jenkins ~/*
    SHELL
   end
 
