@@ -120,6 +120,11 @@ Vagrant.configure(2) do |config|
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
       export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+      # Get client bundle from UCP
+      sudo apt-get update && apt-get install curl jq
+      export AUTHTOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
+      curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o bundle.zip
+      unzip bundle.zip 
    SHELL
   end
 
