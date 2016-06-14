@@ -19,7 +19,7 @@ Vagrant.configure(2) do |config|
     ucp_node.vm.network "private_network", type: "dhcp"
     ucp_node.vm.hostname = "ucp-node"
     config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "4096"]
+       vb.customize ["modifyvm", :id, "--memory", "2560"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
     ucp_node.vm.provision "shell", inline: <<-SHELL
@@ -45,7 +45,7 @@ Vagrant.configure(2) do |config|
      dtr_node.vm.network "private_network", type: "dhcp"
      dtr_node.vm.hostname = "dtr-node"
      config.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--memory", "4096"]
+        vb.customize ["modifyvm", :id, "--memory", "2560"]
         vb.customize ["modifyvm", :id, "--cpus", "2"]
      end
      dtr_node.vm.provision "shell", inline: <<-SHELL
@@ -81,7 +81,7 @@ Vagrant.configure(2) do |config|
     jenkins.vm.network "private_network", type: "dhcp"
     jenkins.vm.hostname = "jenkins-node"
     config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "4096"]
+       vb.customize ["modifyvm", :id, "--memory", "2560"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
     jenkins.vm.provision "shell", inline: <<-SHELL
@@ -124,12 +124,12 @@ Vagrant.configure(2) do |config|
       sudo apt-get update && apt-get install curl jq
       export AUTHTOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
       curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o bundle.zip
-      unzip bundle.zip 
+      unzip bundle.zip
    SHELL
   end
 
   # Swarm child practice node
- config.vm.define "node1" do |node1|
+ config.vm.define "app-node1" do |node1|
    node1.vm.box = "ubuntu/trusty64"
    node1.vm.network "private_network", type: "dhcp"
    node1.vm.hostname = "node1"
@@ -146,9 +146,50 @@ Vagrant.configure(2) do |config|
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
+    SHELL
+  end
+
+  # Swarm child practice node
+ config.vm.define "app-node2" do |node2|
+   node2.vm.box = "ubuntu/trusty64"
+   node2.vm.network "private_network", type: "dhcp"
+   node2.vm.hostname = "node1"
+   config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024"]
+      vb.customize ["modifyvm", :id, "--cpus", "2"]
+   end
+   node2.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     sudo apt-get install -y linux-image-extra-virtual
+     echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+     sudo apt-get update && sudo apt-get -y install docker-engine
+     sudo usermod -a -G docker vagrant
+    SHELL
+  end
+
+  # Swarm child practice node
+ config.vm.define "app-node3" do |node3|
+   node3.vm.box = "ubuntu/trusty64"
+   node3.vm.network "private_network", type: "dhcp"
+   node3.vm.hostname = "node1"
+   config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024"]
+      vb.customize ["modifyvm", :id, "--cpus", "2"]
+   end
+   node3.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     sudo apt-get install -y linux-image-extra-virtual
+     echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+     sudo apt-get update && sudo apt-get -y install docker-engine
+     sudo usermod -a -G docker vagrant
   SHELL
  end
-
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
