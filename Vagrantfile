@@ -132,7 +132,7 @@ Vagrant.configure(2) do |config|
  config.vm.define "app-node1" do |node1|
    node1.vm.box = "ubuntu/trusty64"
    node1.vm.network "private_network", type: "dhcp"
-   node1.vm.hostname = "node1"
+   node1.vm.hostname = "app-node1"
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024"]
       vb.customize ["modifyvm", :id, "--cpus", "2"]
@@ -159,7 +159,7 @@ Vagrant.configure(2) do |config|
  config.vm.define "app-node2" do |node2|
    node2.vm.box = "ubuntu/trusty64"
    node2.vm.network "private_network", type: "dhcp"
-   node2.vm.hostname = "node1"
+   node2.vm.hostname = "app-node2"
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024"]
       vb.customize ["modifyvm", :id, "--cpus", "2"]
@@ -186,7 +186,7 @@ Vagrant.configure(2) do |config|
  config.vm.define "app-node3" do |node3|
    node3.vm.box = "ubuntu/trusty64"
    node3.vm.network "private_network", type: "dhcp"
-   node3.vm.hostname = "node1"
+   node3.vm.hostname = "app-node3"
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024"]
       vb.customize ["modifyvm", :id, "--cpus", "2"]
