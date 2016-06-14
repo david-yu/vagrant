@@ -155,6 +155,8 @@ Vagrant.configure(2) do |config|
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+     echo 'DOCKER_OPTS="--label region=us"' | sudo tee -a /etc/default/docker
+     sudo service docker restart
     SHELL
   end
 
@@ -182,6 +184,8 @@ Vagrant.configure(2) do |config|
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+     echo 'DOCKER_OPTS="--label region=us"' | sudo tee -a /etc/default/docker
+     sudo service docker restart
     SHELL
   end
 
@@ -209,6 +213,8 @@ Vagrant.configure(2) do |config|
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+     echo 'DOCKER_OPTS="--label region=us"' | sudo tee -a /etc/default/docker
+     sudo service docker restart
   SHELL
  end
 
