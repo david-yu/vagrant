@@ -21,10 +21,12 @@ Vagrant.configure(2) do |config|
     config.vm.provider :virtualbox do |vb|
        vb.customize ["modifyvm", :id, "--memory", "2560"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
+       vb.name = "ucp-node"
     end
     ucp_node.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
+     sudo apt-get install -y linux-generic-lts-vivid
      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
      sudo apt-get update && sudo apt-get install -y apt-transport-https
      sudo apt-get install -y linux-image-extra-virtual
@@ -47,11 +49,13 @@ Vagrant.configure(2) do |config|
      config.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", "2560"]
         vb.customize ["modifyvm", :id, "--cpus", "2"]
+        vb.name = "dtr-node"
      end
      dtr_node.vm.provision "shell", inline: <<-SHELL
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get -y install apt-transport-https
       sudo apt-get install -y linux-image-extra-virtual
+      sudo apt-get install -y linux-generic-lts-vivid
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
@@ -83,16 +87,17 @@ Vagrant.configure(2) do |config|
     config.vm.provider :virtualbox do |vb|
        vb.customize ["modifyvm", :id, "--memory", "2560"]
        vb.customize ["modifyvm", :id, "--cpus", "2"]
+       vb.name = "jenkins-node"
     end
     jenkins.vm.provision "shell", inline: <<-SHELL
       echo "deb http://zw.archive.ubuntu.com/ubuntu/ precise main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
       sudo apt-get update
       sudo apt-get install -y apt-transport-https ca-certificates
+      sudo apt-get install -y linux-generic-lts-vivid
       sudo apt-get install -y default-jre default-jdk daemon curl jq unzip
       # Install Docker daemon
       curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
       sudo apt-get update && sudo apt-get install -y apt-transport-https
-      sudo apt-get install -y linux-image-extra-virtual
       echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee -a /etc/apt/sources.list.d/docker.list
       sudo apt-get update && sudo apt-get -y install docker-engine
       sudo usermod -a -G docker vagrant
@@ -139,6 +144,7 @@ Vagrant.configure(2) do |config|
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024"]
       vb.customize ["modifyvm", :id, "--cpus", "2"]
+      vb.name = "app-node1"
    end
    node1.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
@@ -146,6 +152,7 @@ Vagrant.configure(2) do |config|
      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
      sudo apt-get update && sudo apt-get install -y apt-transport-https
      sudo apt-get install -y linux-image-extra-virtual
+     sudo apt-get install -y linux-generic-lts-vivid
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
@@ -168,6 +175,7 @@ Vagrant.configure(2) do |config|
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024"]
       vb.customize ["modifyvm", :id, "--cpus", "2"]
+      vb.name = "app-node2"
    end
    node2.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
@@ -175,6 +183,7 @@ Vagrant.configure(2) do |config|
      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
      sudo apt-get update && sudo apt-get install -y apt-transport-https
      sudo apt-get install -y linux-image-extra-virtual
+     sudo apt-get install -y linux-generic-lts-vivid
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
@@ -197,6 +206,7 @@ Vagrant.configure(2) do |config|
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024"]
       vb.customize ["modifyvm", :id, "--cpus", "2"]
+      vb.name = "app-node3"
    end
    node3.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
@@ -204,6 +214,7 @@ Vagrant.configure(2) do |config|
      curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
      sudo apt-get update && sudo apt-get install -y apt-transport-https
      sudo apt-get install -y linux-image-extra-virtual
+     sudo apt-get install -y linux-generic-lts-vivid
      echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
