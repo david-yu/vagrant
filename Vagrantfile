@@ -160,7 +160,7 @@ Vagrant.configure(2) do |config|
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
-     echo 'DOCKER_OPTS="--label nodeType==app"' | sudo tee -a /etc/default/docker
+     echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      sudo service docker restart
     SHELL
   end
@@ -191,7 +191,7 @@ Vagrant.configure(2) do |config|
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
-     echo 'DOCKER_OPTS="--label nodeType==app"' | sudo tee -a /etc/default/docker
+     echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      sudo service docker restart
     SHELL
   end
@@ -222,7 +222,7 @@ Vagrant.configure(2) do |config|
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
-     echo 'DOCKER_OPTS="--label nodeType==app"' | sudo tee -a /etc/default/docker
+     echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      sudo service docker restart
   SHELL
  end
@@ -233,8 +233,8 @@ Vagrant.configure(2) do |config|
    lbnode.vm.network "private_network", type: "dhcp"
    lbnode.vm.hostname = "lb-node"
    config.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "1024"]
-      vb.customize ["modifyvm", :id, "--cpus", "2"]
+      vb.customize ["modifyvm", :id, "--memory", "512"]
+      vb.customize ["modifyvm", :id, "--cpus", "1"]
       vb.name = "lb-node"
    end
    lbnode.vm.provision "shell", inline: <<-SHELL
