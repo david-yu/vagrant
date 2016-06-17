@@ -74,6 +74,10 @@ Vagrant.configure(2) do |config|
       export UCP_AUTH_TOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
       export UCP_CONFIG_DATA="{\"url\":\"https://${DTR_IPADDR}\", \"insecure\":true }"
       curl -k -s -c jar -H "Authorization: Bearer ${UCP_AUTH_TOKEN}" https://${UCP_IPADDR}/api/config/registry -X POST --data "${UCP_CONFIG_DATA}"
+      # Install registry certificates on client Docker daemon
+      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+      sudo update-ca-certificates
     SHELL
   end
 
@@ -162,6 +166,10 @@ Vagrant.configure(2) do |config|
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      sudo service docker restart
+     # Install registry certificates on client Docker daemon
+     export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+     openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+     sudo update-ca-certificates
     SHELL
   end
 
@@ -193,6 +201,10 @@ Vagrant.configure(2) do |config|
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      sudo service docker restart
+     # Install registry certificates on client Docker daemon
+     export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+     openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+     sudo update-ca-certificates
     SHELL
   end
 
@@ -224,6 +236,10 @@ Vagrant.configure(2) do |config|
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      sudo service docker restart
+     # Install registry certificates on client Docker daemon
+     export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+     openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+     sudo update-ca-certificates
   SHELL
  end
 
@@ -253,8 +269,12 @@ Vagrant.configure(2) do |config|
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
-     echo 'DOCKER_OPTS="--label nodeType==lb"' | sudo tee -a /etc/default/docker
+     echo 'DOCKER_OPTS="--label nodeType=lb"' | sudo tee -a /etc/default/docker
      sudo service docker restart
+     # Install registry certificates on client Docker daemon
+     export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+     openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+     sudo update-ca-certificates
   SHELL
  end
 
