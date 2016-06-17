@@ -78,6 +78,9 @@ Vagrant.configure(2) do |config|
       export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
       openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
       sudo update-ca-certificates
+      # Install Docker Compose
+      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+      sudo chmod +x /usr/local/bin/docker-compose
     SHELL
   end
 
