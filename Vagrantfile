@@ -71,7 +71,7 @@ Vagrant.configure(2) do |config|
       curl -u admin:admin -k  -H "Content-Type: application/json" https://${DTR_IPADDR}/api/v0/meta/settings -X POST --data-binary "${DTR_CONFIG_DATA}"
       # Configure UCP to use DTR
       sudo apt-get -y install jq
-      export UCP_AUTH_TOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
+      export UCP_AUTH_TOKEN=$(curl -k -c jar https://${UCP_IPADDR}/auth/login -d '{"username":"admin","password":"admin"}' -X POST | jq -r ".auth_token")
       export UCP_CONFIG_DATA="{\"url\":\"https://${DTR_IPADDR}\", \"insecure\":true }"
       curl -k -s -c jar -H "Authorization: Bearer ${UCP_AUTH_TOKEN}" https://${UCP_IPADDR}/api/config/registry -X POST --data "${UCP_CONFIG_DATA}"
       # Install registry certificates on client Docker daemon
@@ -81,6 +81,8 @@ Vagrant.configure(2) do |config|
       # Install Docker Compose
       sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
+      # Retrive Docker notary to download
+      git clone https://github.com/docker/notary.git
     SHELL
   end
 
@@ -280,6 +282,69 @@ Vagrant.configure(2) do |config|
      sudo update-ca-certificates
   SHELL
  end
+
+ # Swarm child practice node
+ config.vm.define "docker112node1" do |docker112node1|
+   docker112node1.vm.box = "ubuntu/trusty64"
+   docker112node1.vm.network "private_network", type: "dhcp"
+   docker112node1.vm.hostname = "lb-node"
+   config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "512"]
+      vb.customize ["modifyvm", :id, "--cpus", "1"]
+      vb.name = "docker112-node"
+   end
+   docker112node1.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     sudo apt-get install -y linux-image-extra-virtual
+     sudo apt-get install -y linux-generic-lts-vivid
+     curl -fsSL https://test.docker.com/ | sh
+     sudo usermod -a -G docker vagrant
+  SHELL
+ end
+
+ # Swarm child practice node
+ config.vm.define "docker112node2" do |docker112node2|
+   docker112node2.vm.box = "ubuntu/trusty64"
+   docker112node2.vm.network "private_network", type: "dhcp"
+   docker112node2.vm.hostname = "lb-node"
+   config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "512"]
+      vb.customize ["modifyvm", :id, "--cpus", "1"]
+      vb.name = "docker112-node"
+   end
+   docker112node2.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     sudo apt-get install -y linux-image-extra-virtual
+     sudo apt-get install -y linux-generic-lts-vivid
+     curl -fsSL https://test.docker.com/ | sh
+     sudo usermod -a -G docker vagrant
+  SHELL
+end
+
+# Swarm child practice node
+config.vm.define "docker112node3" do |docker112node3|
+  docker112node3.vm.box = "ubuntu/trusty64"
+  docker112node3.vm.network "private_network", type: "dhcp"
+  docker112node3.vm.hostname = "lb-node"
+  config.vm.provider :virtualbox do |vb|
+     vb.customize ["modifyvm", :id, "--memory", "512"]
+     vb.customize ["modifyvm", :id, "--cpus", "1"]
+     vb.name = "docker112-node"
+  end
+  docker112node3.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https ca-certificates
+    sudo apt-get update && sudo apt-get install -y apt-transport-https
+    sudo apt-get install -y linux-image-extra-virtual
+    sudo apt-get install -y linux-generic-lts-vivid
+    curl -fsSL https://test.docker.com/ | sh
+    sudo usermod -a -G docker vagrant
+ SHELL
+end
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
