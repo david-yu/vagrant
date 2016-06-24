@@ -1,6 +1,14 @@
 Vagrant Virtualbox setup for Docker
 ========================
 
+## Download vagrant from https://www.vagrantup.com/downloads.html
+
+## Download trusty64
+
+```
+vagrant init ubuntu/trusty64
+``
+
 ## Bring up/Resume UCP, DTR, and Jenkins nodes
 
 ```
