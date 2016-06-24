@@ -81,8 +81,10 @@ Vagrant.configure(2) do |config|
       # Install Docker Compose
       sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
-      # Retrive Docker notary to download
+      # Retrive Docker notary and bring up using Docker Compose
       git clone https://github.com/docker/notary.git
+      cd notary
+      docker-compose up -d
     SHELL
   end
 
