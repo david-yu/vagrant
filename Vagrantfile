@@ -313,6 +313,9 @@ Vagrant.configure(2) do |config|
      ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/docker112master-ipaddr
      export DOCKER_MASTER=$(cat /vagrant/docker112master-ipaddr)
      docker swarm init --listen-addr ${DOCKER_MASTER}:2377
+     # install compose
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo chmod +x /usr/local/bin/docker-compose
   SHELL
  end
 
@@ -337,9 +340,6 @@ Vagrant.configure(2) do |config|
      # initialize swarm
      export DOCKER_MASTER=$(cat /vagrant/docker112master-ipaddr)
      docker swarm join ${DOCKER_MASTER}:2377
-     # install compose
-     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
-     sudo chmod +x /usr/local/bin/docker-compose
   SHELL
 end
 
