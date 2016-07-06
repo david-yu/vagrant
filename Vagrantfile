@@ -293,16 +293,16 @@ Vagrant.configure(2) do |config|
  end
 
  # Swarm child practice node
- config.vm.define "docker112node1" do |docker112node1|
-   docker112node1.vm.box = "ubuntu/trusty64"
-   docker112node1.vm.network "private_network", type: "dhcp"
-   docker112node1.vm.hostname = "lb-node"
+ config.vm.define "docker112-master" do |docker112master|
+   docker112master.vm.box = "ubuntu/trusty64"
+   docker112master.vm.network "private_network", type: "dhcp"
+   docker112master.vm.hostname = "docker112-master"
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "512"]
       vb.customize ["modifyvm", :id, "--cpus", "1"]
-      vb.name = "docker112-node"
+      vb.name = "docker112-master"
    end
-   docker112node1.vm.provision "shell", inline: <<-SHELL
+   docker112master.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
      sudo apt-get update && sudo apt-get install -y apt-transport-https
@@ -310,20 +310,23 @@ Vagrant.configure(2) do |config|
      sudo apt-get install -y linux-generic-lts-vivid
      curl -fsSL https://test.docker.com/ | sh
      sudo usermod -a -G docker vagrant
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/docker112master-ipaddr
+     export DOCKER_MASTER=$(cat /vagrant/docker112master-ipaddr)
+     docker swarm init --listen-addr ${DOCKER_MASTER}:2377
   SHELL
  end
 
  # Swarm child practice node
- config.vm.define "docker112node2" do |docker112node2|
-   docker112node2.vm.box = "ubuntu/trusty64"
-   docker112node2.vm.network "private_network", type: "dhcp"
-   docker112node2.vm.hostname = "lb-node"
+ config.vm.define "docker112-child1" do |docker112child1|
+   docker112child1.vm.box = "ubuntu/trusty64"
+   docker112child1.vm.network "private_network", type: "dhcp"
+   docker112child1.vm.hostname = "docker112-child1"
    config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "512"]
       vb.customize ["modifyvm", :id, "--cpus", "1"]
-      vb.name = "docker112-node"
+      vb.name = "docker112-child1"
    end
-   docker112node2.vm.provision "shell", inline: <<-SHELL
+   docker112child1.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get install -y apt-transport-https ca-certificates
      sudo apt-get update && sudo apt-get install -y apt-transport-https
@@ -331,20 +334,26 @@ Vagrant.configure(2) do |config|
      sudo apt-get install -y linux-generic-lts-vivid
      curl -fsSL https://test.docker.com/ | sh
      sudo usermod -a -G docker vagrant
+     # initialize swarm
+     export DOCKER_MASTER=$(cat /vagrant/docker112master-ipaddr)
+     docker swarm join ${DOCKER_MASTER}:2377
+     # install compose
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo chmod +x /usr/local/bin/docker-compose
   SHELL
 end
 
 # Swarm child practice node
-config.vm.define "docker112node3" do |docker112node3|
-  docker112node3.vm.box = "ubuntu/trusty64"
-  docker112node3.vm.network "private_network", type: "dhcp"
-  docker112node3.vm.hostname = "lb-node"
+config.vm.define "docker112-child2" do |docker112child2|
+  docker112child2.vm.box = "ubuntu/trusty64"
+  docker112child2.vm.network "private_network", type: "dhcp"
+  docker112child2.vm.hostname = "docker112-child2"
   config.vm.provider :virtualbox do |vb|
      vb.customize ["modifyvm", :id, "--memory", "512"]
      vb.customize ["modifyvm", :id, "--cpus", "1"]
-     vb.name = "docker112-node"
+     vb.name = "docker112-child2"
   end
-  docker112node3.vm.provision "shell", inline: <<-SHELL
+  docker112child2.vm.provision "shell", inline: <<-SHELL
     sudo apt-get update
     sudo apt-get install -y apt-transport-https ca-certificates
     sudo apt-get update && sudo apt-get install -y apt-transport-https
@@ -352,6 +361,8 @@ config.vm.define "docker112node3" do |docker112node3|
     sudo apt-get install -y linux-generic-lts-vivid
     curl -fsSL https://test.docker.com/ | sh
     sudo usermod -a -G docker vagrant
+    export DOCKER_MASTER=$(cat /vagrant/docker112master-ipaddr)
+    docker swarm join ${DOCKER_MASTER}:2377
  SHELL
 end
 
