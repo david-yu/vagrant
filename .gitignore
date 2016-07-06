@@ -3,6 +3,7 @@
 ucp-ca.pem
 dtr-ipaddr
 jenkins-ipaddr
+docker112master-ipaddr
 ucp-ipaddr
 ucp-fingerprint
 docker_subscription.lic
