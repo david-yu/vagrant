@@ -87,9 +87,9 @@ Vagrant.configure(2) do |config|
       sudo chmod +x /usr/local/bin/docker-compose
       # Retrive Docker notary and bring up using Docker Compose
       git clone https://github.com/docker/notary.git
-      cd notary
+      cd /home/vagrant/notary
       docker-compose up -d
-      # Setup DTR to use Notray
+      # TODO: Setup DTR to use Notary
     SHELL
   end
 
