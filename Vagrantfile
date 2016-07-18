@@ -142,7 +142,9 @@ Vagrant.configure(2) do |config|
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
       # Get client bundle from UCP
       export AUTHTOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
-      curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o bundle.zip
+      sudo mkdir ucp-bundle
+      curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o ucp-bundle/bundle.zip
+      sudo cd ucp-bundle
       unzip bundle.zip
       sudo chmod +x env.sh
       sudo chown jenkins ~/*
