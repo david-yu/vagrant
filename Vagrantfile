@@ -42,6 +42,62 @@ Vagrant.configure(2) do |config|
      # openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
      # sudo update-ca-certificates
      # sudo service docker restart
+     # Backup UCP to get certificates and keys
+     docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --interactive --root-ca-only --passphrase "secret" > /vagrant/backup.tar
+   SHELL
+  end
+
+  # UCP node 2 (HA) for UCP/DTR setup
+  config.vm.define "ucp-node2" do |ucp_node2|
+    ucp_node2.vm.box = "ubuntu/trusty64"
+    ucp_node2.vm.network "private_network", type: "dhcp"
+    ucp_node2.vm.hostname = "ucp-node2"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "2560"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+       vb.name = "ucp-node2"
+    end
+    ucp_node2.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     sudo apt-get install -y linux-generic-lts-vivid
+     curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+     sudo apt-get update && sudo apt-get -y install docker-engine
+     sudo usermod -a -G docker vagrant
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp2-ipaddr
+     # Setup Controller
+     export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
+     export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+     docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/backup.tar:/backup.tar docker/ucp join --url https://${UCP_IPADDR} --replica --fingerprint ${UCP_FINGERPRINT} --passphrase "secret"
+   SHELL
+  end
+
+  # UCP node 3 (HA) for UCP/DTR setup
+  config.vm.define "ucp-node3" do |ucp_node3|
+    ucp_node3.vm.box = "ubuntu/trusty64"
+    ucp_node3.vm.network "private_network", type: "dhcp"
+    ucp_node3.vm.hostname = "ucp-node3"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "2560"]
+       vb.customize ["modifyvm", :id, "--cpus", "2"]
+       vb.name = "ucp-node3"
+    end
+    ucp_node3.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     sudo apt-get install -y linux-generic-lts-vivid
+     curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+     sudo apt-get update && sudo apt-get -y install docker-engine
+     sudo usermod -a -G docker vagrant
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp3-ipaddr
+     # Setup Controller
+     export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
+     export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+     docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/backup.tar:/backup.tar docker/ucp join --url https://${UCP_IPADDR} --replica --fingerprint ${UCP_FINGERPRINT} --passphrase "secret"
    SHELL
   end
 
@@ -131,7 +187,7 @@ Vagrant.configure(2) do |config|
       export JENKINS_HOME=~/jenkins/
       sudo service jenkins restart
       # Install Docker Compose
-      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0-rc2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
       sudo -u jenkins docker login -u admin -p admin https://${DTR_IPADDR}
       # Join UCP Swarm
