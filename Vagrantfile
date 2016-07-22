@@ -70,7 +70,7 @@ Vagrant.configure(2) do |config|
      # Setup Controller
      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
-     docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/backup.tar:/backup.tar docker/ucp join --url https://${UCP_IPADDR} --replica --fingerprint ${UCP_FINGERPRINT} --passphrase "secret"
+     docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/backup.tar:/backup.tar docker/ucp join --url https://${UCP_IPADDR} --replica --fingerprint ${UCP_FINGERPRINT} --ucp-username admin --ucp-password admin 
    SHELL
   end
 
@@ -97,7 +97,7 @@ Vagrant.configure(2) do |config|
      # Setup Controller
      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
-     docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/backup.tar:/backup.tar docker/ucp join --url https://${UCP_IPADDR} --replica --fingerprint ${UCP_FINGERPRINT} --passphrase "secret"
+     docker run --rm -it --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/backup.tar:/backup.tar docker/ucp join --url https://${UCP_IPADDR} --replica --fingerprint ${UCP_FINGERPRINT} --ucp-username admin --ucp-password admin
    SHELL
   end
 
