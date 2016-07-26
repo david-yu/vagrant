@@ -43,7 +43,7 @@ Vagrant.configure(2) do |config|
      # sudo update-ca-certificates
      # sudo service docker restart
      # Backup UCP to get certificates and keys
-     docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --interactive --root-ca-only --passphrase "secret" > /vagrant/backup.tar
+     docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --root-ca-only --passphrase "secret" > /vagrant/backup.tar
    SHELL
   end
 
@@ -205,7 +205,7 @@ Vagrant.configure(2) do |config|
       sudo mkdir ucp-bundle
       curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o ucp-bundle/bundle.zip
       sudo cd ucp-bundle
-      unzip bundle.zip
+      sudo unzip bundle.zip
       sudo chmod +x env.sh
       sudo chown jenkins ~/*
       sudo chgrp jenkins ~/*
@@ -233,10 +233,10 @@ Vagrant.configure(2) do |config|
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
      # Join UCP Swarm
-     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/appnode1-ipaddr
      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
-     export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
+     export APPNODE1_IPADDR=$(cat /vagrant/appnode1-ipaddr)
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      # Install registry certificates on client Docker daemon
@@ -270,11 +270,11 @@ Vagrant.configure(2) do |config|
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
      # Join UCP Swarm
-     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/appnode2-ipaddr
      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
-     export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
-     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+     export APPNODE2_IPADDR=$(cat /vagrant/appnode2-ipaddr)
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${APPNODE2_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      # Install registry certificates on client Docker daemon
      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
@@ -305,11 +305,11 @@ Vagrant.configure(2) do |config|
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
      # Join UCP Swarm
-     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/appnode3-ipaddr
      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
-     export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
-     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+     export APPNODE3_IPADDR=$(cat /vagrant/appnode3-ipaddr)
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${APPNODE3_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      # Install registry certificates on client Docker daemon
      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
