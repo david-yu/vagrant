@@ -237,7 +237,7 @@ Vagrant.configure(2) do |config|
      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
      export APPNODE1_IPADDR=$(cat /vagrant/appnode1-ipaddr)
-     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${APPNODE1_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=app"' | sudo tee -a /etc/default/docker
      # Install registry certificates on client Docker daemon
      # https://docs.docker.com/docker-trusted-registry/configure/config-security/
