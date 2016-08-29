@@ -1,6 +1,7 @@
 .vagrant
 .crt
 .DS_Store
+.tar.gz
 ucp-ca.pem
 dtr-ipaddr
 jenkins-ipaddr

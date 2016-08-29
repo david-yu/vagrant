@@ -37,13 +37,13 @@ Vagrant.configure(2) do |config|
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/docker_subscription.lic:/docker_subscription.lic docker/ucp install --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
      # Retrieve UCP fingerprint
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp fingerprint | awk -F "=" '/SHA-256 Fingerprint/ {print $2}'  > /vagrant/ucp-fingerprint
-     # Install registry certificates on client Docker daemon
-     # export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
-     # openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
-     # sudo update-ca-certificates
-     # sudo service docker restart
      # Backup UCP to get certificates and keys
      docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --root-ca-only --passphrase "secret" > /vagrant/backup.tar
+     # Get UCP cluster CA
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp dump-certs --cluster --ca > /vagrant/ucp-cluster-ca.pem
+     # Install script for self-signed certs onto UCP
+     cp /vagrant/install-certs-ucp.sh
+     chmod +x install-certs-ucp.sh
    SHELL
   end
 
@@ -133,7 +133,7 @@ Vagrant.configure(2) do |config|
       docker run --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
       # Configure DTR to trust UCP, excepted from https://raw.githubusercontent.com/alexmavr/ddc-eval/master/ddc_evaluation.sh
       echo -e "Configuring DTR to trust UCP"
-      export DTR_CONFIG_DATA="{\"authBypassCA\":\"$(cat /vagrant/ucp-ca.pem | awk 'BEGIN{ORS="\\n"}1')\"}"
+      export DTR_CONFIG_DATA="{\"authBypassCA\":\"$(cat /vagrant/ucp-cluster-ca.pem | awk 'BEGIN{ORS="\\n"}1')\"}"
       echo -e "DTR_CONFIG_DATA = ${DTR_CONFIG_DATA}"
       curl -u admin:admin -k  -H "Content-Type: application/json" https://${DTR_IPADDR}/api/v0/meta/settings -X POST --data-binary "${DTR_CONFIG_DATA}"
       # Configure UCP to use DTR
@@ -143,13 +143,14 @@ Vagrant.configure(2) do |config|
       export UCP_CONFIG_DATA="{\"url\":\"https://${DTR_IPADDR}\", \"insecure\":true }"
       curl -k -s -c jar -H "Authorization: Bearer ${UCP_AUTH_TOKEN}" https://${UCP_IPADDR}/api/config/registry -X POST --data "${UCP_CONFIG_DATA}"
       # Install Docker Compose
-      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
       # Retrive Docker notary and bring up using Docker Compose
       git clone https://github.com/docker/notary.git
       cd /home/vagrant/notary
       docker-compose up -d
-      # TODO: Setup DTR to use Notary
+      # Setup DTR to use Notary
+      curl -sk -o /dev/null -w "%{http_code}" -X POST --header "Content-Type: application/json" --header "Accept: application/json" -u admin:admin -d "{\"notaryServer\": \"https://${DTR_IPADDR}:4443\",\"notaryVerifyCert\": false}" "https://${DTR_IPADDR}/api/v0/meta/settings"
     SHELL
   end
 
@@ -355,6 +356,28 @@ Vagrant.configure(2) do |config|
      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
      sudo chmod +x /usr/local/bin/docker-compose
   SHELL
+ end
+
+ config.vm.define "docker-client" do |docker_client|
+   docker_client.vm.box = "ubuntu/trusty64"
+   docker_client.vm.network "private_network", type: "dhcp"
+   docker_client.vm.hostname = "docker-client"
+   config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "512"]
+      vb.customize ["modifyvm", :id, "--cpus", "1"]
+      vb.name = "docker-client"
+   end
+   docker_client.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates
+     curl -s 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add --import
+     sudo apt-get update && sudo apt-get install -y apt-transport-https
+     sudo apt-get install -y linux-image-extra-virtual
+     sudo apt-get install -y linux-generic-lts-vivid
+     echo "deb https://packages.docker.com/1.11/apt/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+     sudo apt-get update && sudo apt-get -y install docker-engine
+     sudo usermod -a -G docker vagrant
+   SHELL
  end
 
  # Swarm child practice node
