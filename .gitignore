@@ -3,6 +3,8 @@
 .DS_Store
 .tar.gz
 ucp-ca.pem
+dtr-ca.pem
+ucp-cluster-ca.pem
 dtr-ipaddr
 jenkins-ipaddr
 docker112master-ipaddr
