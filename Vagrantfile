@@ -246,7 +246,9 @@ Vagrant.configure(2) do |config|
      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
      sudo update-ca-certificates
      sudo service docker restart
-     # TODO: Run above on UCP Node
+     # Install Docker Compose
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo chmod +x /usr/local/bin/docker-compose
     SHELL
   end
 
@@ -282,6 +284,9 @@ Vagrant.configure(2) do |config|
      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
      sudo update-ca-certificates
      sudo service docker restart
+     # Install Docker Compose
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo chmod +x /usr/local/bin/docker-compose
     SHELL
   end
 
@@ -317,6 +322,9 @@ Vagrant.configure(2) do |config|
      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
      sudo update-ca-certificates
      sudo service docker restart
+     # Install Docker Compose
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo chmod +x /usr/local/bin/docker-compose
   SHELL
  end
 
