@@ -131,7 +131,7 @@ Vagrant.configure(2) do |config|
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url https://${UCP_IPADDR} --host-address ${DTR_IPADDR} --fingerprint ${UCP_FINGERPRINT}
       # Install DTR
       docker run --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
-      # Configure DTR to trust UCP, excepted from https://raw.githubusercontent.com/alexmavr/ddc-eal/master/ddc_evaluation.sh
+      # Configure DTR to trust UCP, excepted from https://raw.githubusercontent.com/alexmavr/ddc-eval/master/ddc_evaluation.sh
       echo -e "Configuring DTR to trust UCP"
       export DTR_CONFIG_DATA="{\"authBypassCA\":\"$(cat /vagrant/ucp-cluster-ca.pem | awk 'BEGIN{ORS="\\n"}1')\"}"
       echo -e "DTR_CONFIG_DATA = ${DTR_CONFIG_DATA}"
