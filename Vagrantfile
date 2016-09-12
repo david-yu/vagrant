@@ -131,7 +131,7 @@ Vagrant.configure(2) do |config|
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url https://${UCP_IPADDR} --host-address ${DTR_IPADDR} --fingerprint ${UCP_FINGERPRINT}
       # Install DTR
       docker run --rm docker/dtr install --ucp-url https://${UCP_IPADDR} --ucp-node dtr-node --dtr-external-url ${DTR_IPADDR} --ucp-username admin --ucp-password admin --ucp-ca "$(cat /vagrant/ucp-ca.pem)"
-      # Configure DTR to trust UCP, excepted from https://raw.githubusercontent.com/alexmavr/ddc-eval/master/ddc_evaluation.sh
+      # Configure DTR to trust UCP, excepted from https://raw.githubusercontent.com/alexmavr/ddc-eal/master/ddc_evaluation.sh
       echo -e "Configuring DTR to trust UCP"
       export DTR_CONFIG_DATA="{\"authBypassCA\":\"$(cat /vagrant/ucp-cluster-ca.pem | awk 'BEGIN{ORS="\\n"}1')\"}"
       echo -e "DTR_CONFIG_DATA = ${DTR_CONFIG_DATA}"
@@ -142,6 +142,10 @@ Vagrant.configure(2) do |config|
       export UCP_AUTH_TOKEN=$(curl -k -c jar https://${UCP_IPADDR}/auth/login -d '{"username":"admin","password":"admin"}' -X POST | jq -r ".auth_token")
       export UCP_CONFIG_DATA="{\"url\":\"https://${DTR_IPADDR}\", \"insecure\":true }"
       curl -k -s -c jar -H "Authorization: Bearer ${UCP_AUTH_TOKEN}" https://${UCP_IPADDR}/api/config/registry -X POST --data "${UCP_CONFIG_DATA}"
+      # Install registry certificates on client Docker daemon
+      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+      sudo update-ca-certificates
       # Install Docker Compose
       sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
@@ -349,11 +353,11 @@ Vagrant.configure(2) do |config|
      sudo apt-get update && sudo apt-get -y install docker-engine
      sudo usermod -a -G docker vagrant
      # Join UCP Swarm
-     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/jenkins-ipaddr
+     ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/lb-ipaddr
      export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
      export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
-     export JENKINS_IPADDR=$(cat /vagrant/jenkins-ipaddr)
-     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${JENKINS_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
+     export LB_IPADDR=$(cat /vagrant/lb-ipaddr)
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --host-address ${LB_IPADDR} --url https://${UCP_IPADDR} --fingerprint ${UCP_FINGERPRINT}
      echo 'DOCKER_OPTS="--label nodeType=lb"' | sudo tee -a /etc/default/docker
      # Install registry certificates on client Docker daemon
      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
@@ -363,6 +367,10 @@ Vagrant.configure(2) do |config|
      # Install Docker Compose
      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
      sudo chmod +x /usr/local/bin/docker-compose
+     # Install lb software
+     git clone https://github.com/yongshin/docker-lb.git
+     cd /home/vagrant/docker-lb
+     docker-compose up -d
   SHELL
  end
 
