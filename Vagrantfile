@@ -37,12 +37,14 @@ Vagrant.configure(2) do |config|
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/docker_subscription.lic:/docker_subscription.lic docker/ucp install --host-address $(cat "/vagrant/ucp-ipaddr") --admin-password admin
      # Retrieve UCP fingerprint
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp fingerprint | awk -F "=" '/SHA-256 Fingerprint/ {print $2}'  > /vagrant/ucp-fingerprint
+     # Retrieve UCP id
+     docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp id > /vagrant/ucp-id
      # Backup UCP to get certificates and keys
-     docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --root-ca-only --passphrase "secret" > /vagrant/backup.tar
+     docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --root-ca-only --id $(cat "/vagrant/ucp-id")--passphrase "secret" > /vagrant/backup.tar
      # Get UCP cluster CA
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp dump-certs --cluster --ca > /vagrant/ucp-cluster-ca.pem
      # Install script for self-signed certs onto UCP
-     cp /vagrant/install-certs-ucp.sh
+     cp /vagrant/install-certs-ucp.sh .
      chmod +x install-certs-ucp.sh
    SHELL
   end
