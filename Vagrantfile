@@ -129,6 +129,11 @@ Vagrant.configure(2) do |config|
       export UCP_IPADDR=$(cat /vagrant/ucp-ipaddr)
       export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
       export UCP_FINGERPRINT=$(cat /vagrant/ucp-fingerprint)
+      # Install registry certificates on client Docker daemon
+      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
+      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
+      sudo update-ca-certificates
+      sudo service docker restart
       curl -k "https://${UCP_IPADDR}/ca" > /vagrant/ucp-ca.pem
       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp join --admin-username admin --admin-password admin --url https://${UCP_IPADDR} --host-address ${DTR_IPADDR} --fingerprint ${UCP_FINGERPRINT}
       # Install DTR
@@ -144,10 +149,6 @@ Vagrant.configure(2) do |config|
       export UCP_AUTH_TOKEN=$(curl -k -c jar https://${UCP_IPADDR}/auth/login -d '{"username":"admin","password":"admin"}' -X POST | jq -r ".auth_token")
       export UCP_CONFIG_DATA="{\"url\":\"https://${DTR_IPADDR}\", \"insecure\":true }"
       curl -k -s -c jar -H "Authorization: Bearer ${UCP_AUTH_TOKEN}" https://${UCP_IPADDR}/api/config/registry -X POST --data "${UCP_CONFIG_DATA}"
-      # Install registry certificates on client Docker daemon
-      export DTR_IPADDR=$(cat /vagrant/dtr-ipaddr)
-      openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
-      sudo update-ca-certificates
       # Install Docker Compose
       sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
