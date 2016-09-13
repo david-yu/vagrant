@@ -40,7 +40,7 @@ Vagrant.configure(2) do |config|
      # Retrieve UCP id
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp id > /vagrant/ucp-id
      # Backup UCP to get certificates and keys
-     docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --root-ca-only --id $(cat "/vagrant/ucp-id")--passphrase "secret" > /vagrant/backup.tar
+     docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp backup --root-ca-only --id $(cat "/vagrant/ucp-id") --passphrase "secret" > /vagrant/backup.tar
      # Get UCP cluster CA
      docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp dump-certs --cluster --ca > /vagrant/ucp-cluster-ca.pem
      # Install script for self-signed certs onto UCP
@@ -211,11 +211,11 @@ Vagrant.configure(2) do |config|
       export AUTHTOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
       sudo mkdir ucp-bundle
       curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o ucp-bundle/bundle.zip
-      sudo cd ucp-bundle
+      sudo cd /home/vagrant/ucp-bundle
       sudo unzip bundle.zip
-      sudo chmod +x env.sh
-      sudo chown jenkins ~/*
-      sudo chgrp jenkins ~/*
+      sudo chmod +x /home/vagrant/ucp-bundle/env.sh
+      sudo chown -R jenkins /home/vagrant/ucp-bundle
+      sudo chgrp -R jenkins /home/vagrant/ucp-bundle
    SHELL
   end
 

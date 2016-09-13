@@ -8,12 +8,15 @@ ucp-cluster-ca.pem
 dtr-ipaddr
 jenkins-ipaddr
 docker112master-ipaddr
+lb-ipaddr
 ucp-ipaddr
 ucp2-ipaddr
 ucp3-ipaddr
 ucp-fingerprint
+ucp-id
 docker_subscription.lic
 ucp-bundle-admin
+ucp-bundle-aws
 jenkins
 backup.tar
 appnode1-ipaddr
