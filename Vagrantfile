@@ -368,6 +368,7 @@ Vagrant.configure(2) do |config|
      sudo update-ca-certificates
      sudo service docker restart
      # Install Docker Compose
+     export SWARM_HOST=tcp://$(cat /vagrant/ucp-ipaddr):2376
      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
      sudo chmod +x /usr/local/bin/docker-compose
      # Install lb software
