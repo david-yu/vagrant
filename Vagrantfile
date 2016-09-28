@@ -212,7 +212,6 @@ Vagrant.configure(2) do |config|
       export AUTHTOKEN=$(curl -sk -d '{"username":"admin","password":"admin"}' https://${UCP_IPADDR}/auth/login | jq -r .auth_token)
       sudo mkdir ucp-bundle
       curl -k -H "Authorization: Bearer ${AUTHTOKEN}" https://${UCP_IPADDR}/api/clientbundle -o ucp-bundle/bundle.zip
-      sudo cd /home/vagrant/ucp-bundle
       sudo unzip /home/vagrant/ucp-bundle/bundle.zip -d /home/vagrant/ucp-bundle/
       sudo chmod +x /home/vagrant/ucp-bundle/env.sh
       sudo chown -R jenkins /home/vagrant/ucp-bundle
