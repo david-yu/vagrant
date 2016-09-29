@@ -199,7 +199,7 @@ Vagrant.configure(2) do |config|
       export JENKINS_HOME=~/jenkins/
       sudo service jenkins restart
       # Install Docker Compose
-      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+      sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
       sudo chmod +x /usr/local/bin/docker-compose
       sudo -u jenkins docker login -u admin -p admin https://${DTR_IPADDR}
       # Join UCP Swarm
@@ -253,7 +253,7 @@ Vagrant.configure(2) do |config|
      sudo update-ca-certificates
      sudo service docker restart
      # Install Docker Compose
-     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
      sudo chmod +x /usr/local/bin/docker-compose
     SHELL
   end
@@ -291,7 +291,7 @@ Vagrant.configure(2) do |config|
      sudo update-ca-certificates
      sudo service docker restart
      # Install Docker Compose
-     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
      sudo chmod +x /usr/local/bin/docker-compose
     SHELL
   end
@@ -329,7 +329,7 @@ Vagrant.configure(2) do |config|
      sudo update-ca-certificates
      sudo service docker restart
      # Install Docker Compose
-     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+     sudo bash -c 'curl -L https://github.com/docker/compose/releases/download/1.8.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
      sudo chmod +x /usr/local/bin/docker-compose
   SHELL
  end
